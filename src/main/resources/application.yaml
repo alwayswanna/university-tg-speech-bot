@@ -1,0 +1,21 @@
+server:
+  port: 9000
+
+spring:
+  main:
+    web-application-type: none
+  application:
+    name: university-tg-speech-bot
+  jpa:
+    database: postgresql
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+speech-synthesizer-bot:
+  telegram-api:
+    bot-token: 
+    bot-username: "speech synthesizer"
+
