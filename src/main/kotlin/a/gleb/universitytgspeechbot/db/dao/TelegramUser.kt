@@ -24,8 +24,13 @@ data class TelegramUser(
     var botSettings: String?,
 
     @Column(name = "last_update")
-    var lastUpdate: LocalDateTime
+    var lastUpdate: LocalDateTime,
+
+    @Column(name = "is_ready")
+    var isReady: Boolean? = false
 ) {
     /* No-args constructor for Spring */
-    constructor() : this(null, Long.MAX_VALUE, Long.MAX_VALUE, "{}", LocalDateTime.now())
+    constructor() : this(
+        null, Long.MAX_VALUE, Long.MAX_VALUE, "{}", LocalDateTime.now(), true
+    )
 }

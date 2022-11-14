@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties("speech-synthesizer-bot")
 data class TelegramSpeechBotProperties(
     var telegramApi: TelegramApi,
+    var yandexApi: YandexApi
 )
 
 @ConstructorBinding
@@ -17,5 +18,6 @@ data class TelegramApi(
 
 @ConstructorBinding
 data class YandexApi(
-    var token: String
+    var token: String,
+    var folderId: String
 )

@@ -1,8 +1,6 @@
 package a.gleb.universitytgspeechbot.service
 
-import a.gleb.universitytgspeechbot.constants.EN_LOCALE
-import a.gleb.universitytgspeechbot.constants.RU_LOCALE
-import a.gleb.universitytgspeechbot.constants.YANDEX_RUSSIAN_VOICES
+import a.gleb.universitytgspeechbot.constants.*
 import a.gleb.universitytgspeechbot.db.dao.TelegramUser
 import a.gleb.universitytgspeechbot.models.BotSettingModel
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -33,10 +31,11 @@ class BotSettingService(
      * Handle start message from user.
      */
     fun handleStartMessage(chatIdFromUpdate: Long, from: User): SendMessage {
+        val username = from.userName ?: EMPTY
         val helloMessage = SendMessage().apply {
             text = messageService.getMessage(
                 "init.message",
-                arrayOf(from.userName.toString()),
+                arrayOf(username),
                 from.languageCode
             )
             chatId = chatIdFromUpdate.toString()
@@ -88,6 +87,7 @@ class BotSettingService(
             apply {
                 botSettings = objectMapper.writeValueAsString(botSettingModel)
                 lastUpdate = LocalDateTime.now()
+                isReady = true
             }
         }
         telegramUserService.save(user)
@@ -105,16 +105,15 @@ class BotSettingService(
      * Method update setting for Yandex API. (Voice)
      */
     private fun updateSettingsVoice(message: String, user: TelegramUser, from: User): SendMessage {
-        if (message.contains(EN_EMOJI)) {
+        val voidFromMessage: String = if (message.contains(EN_EMOJI)) {
             message.replace(EN_EMOJI, "")
         } else {
             message.replace(RU_EMOJI, "")
         }
-        message.replace(" ", "")
 
 
         val botSettingModel = extractBotSettings(user)
-        botSettingModel.voice = message
+        botSettingModel.voice = voidFromMessage.replace(SPACE, EMPTY)
 
         user.apply {
             apply {
@@ -164,7 +163,7 @@ class BotSettingService(
         val botSetting: BotSettingModel = if (telegramUser.botSettings != null) {
             objectMapper.readValue(telegramUser.botSettings, BotSettingModel::class.java)
         } else {
-            BotSettingModel(null, null)
+            BotSettingModel()
         }
         return botSetting
     }

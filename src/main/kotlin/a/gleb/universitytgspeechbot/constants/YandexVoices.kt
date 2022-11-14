@@ -36,3 +36,19 @@ val YANDEX_RUSSIAN_VOICES = mapOf(
     OMAZH_VOICE to "Омаж",
     ZAHAR_VOICE to "Захар"
 )
+
+val YANDEX_VOICES_MAP = mapOf(
+    "Алена" to ALENA_VOICE,
+    "Филип" to FILIPP_VOICE,
+    "Ермил" to ERMIL_VOICE,
+    "Жанна" to JANE_VOICE,
+    "Мадирус" to MADIRUS_VOICE,
+    "Омаж" to OMAZH_VOICE,
+    "Захар" to ZAHAR_VOICE,
+    "John" to JOHN_VOICE
+
+)
+
+const val EMPTY: String = ""
+
+const val SPACE: String = " "

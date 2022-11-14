@@ -16,6 +16,16 @@ spring:
 
 speech-synthesizer-bot:
   telegram-api:
-    bot-token: 
+    bot-token:
     bot-username: "speech synthesizer"
+  yandex-api:
+    token:
+    folder-id:
+  yandex-iam-api:
+    url: https://iam.api.cloud.yandex.net/iam
+    path: /v1/tokens
+  yandex-speech-api:
+    url: https://tts.api.cloud.yandex.net/speech
+    path: /v1/tts:synthesize
+
 
