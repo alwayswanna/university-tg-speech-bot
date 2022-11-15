@@ -27,5 +27,3 @@ speech-synthesizer-bot:
   yandex-speech-api:
     url: https://tts.api.cloud.yandex.net/speech
     path: /v1/tts:synthesize
-
-

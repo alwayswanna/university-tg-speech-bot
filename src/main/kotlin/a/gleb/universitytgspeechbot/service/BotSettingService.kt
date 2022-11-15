@@ -2,6 +2,7 @@ package a.gleb.universitytgspeechbot.service
 
 import a.gleb.universitytgspeechbot.constants.*
 import a.gleb.universitytgspeechbot.db.dao.TelegramUser
+import a.gleb.universitytgspeechbot.exception.InvalidBotCommandException
 import a.gleb.universitytgspeechbot.models.BotSettingModel
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Service
@@ -19,6 +20,9 @@ const val RU_LOCALE_TEXT = "$RU_EMOJI - Русский"
 
 const val EN_EMOJI = "\uD83C\uDDFA\uD83C\uDDF8"
 const val EN_LOCAL_TEXT = "$EN_EMOJI - English"
+
+const val VOICE = "Voice - \uD83C\uDFB5"
+const val LANGUAGE = "Language - \uD83C\uDDF7\uD83C\uDDFA / \uD83C\uDDFA\uD83C\uDDF8"
 
 @Service
 class BotSettingService(
@@ -48,13 +52,91 @@ class BotSettingService(
         return helloMessage
     }
 
+    fun handleSettingsMessage(
+        chatIdFromUpdate: Long,
+        telegramUser: TelegramUser,
+        from: User,
+        messageOrCallback: String
+    ): SendMessage {
+        return when (messageOrCallback) {
+            SETTINGS -> settingsMain(from, telegramUser)
+            VOICE_SETTINGS -> handleChangeVoice(messageOrCallback, telegramUser, from)
+            LANGUAGE_SETTINGS -> handleChangeLanguage(from, telegramUser)
+            else -> {
+                throw InvalidBotCommandException("Invalid command from user, $messageOrCallback")
+            }
+        }
+    }
+
+    /**
+     * Method handle /settings command from bot.
+     */
+    private fun settingsMain(from: User, telegramUser: TelegramUser): SendMessage {
+        return SendMessage().apply {
+            text = messageService.getMessage(
+                "settings.message",
+                from.languageCode
+            )
+            chatId = telegramUser.chatTelegramId.toString()
+            replyMarkup = InlineKeyboardMarkup().apply {
+                keyboard = settingsKeyBoardsSetup()
+            }
+        }
+    }
+
+    /**
+     * Method handle /language command from user.
+     */
+    fun handleChangeLanguage(from: User, telegramUser: TelegramUser): SendMessage {
+        return SendMessage().apply {
+            text = messageService.getMessage(
+                "settings.language",
+                from.languageCode
+            )
+            chatId = telegramUser.chatTelegramId.toString()
+            replyMarkup = InlineKeyboardMarkup().apply {
+                keyboard = languageKeyBoardsSetup()
+            }
+        }
+    }
+
+    /**
+     * Method handle /voice command from user.
+     */
+    fun handleChangeVoice(messageOrCallback: String, telegramUser: TelegramUser, from: User): SendMessage {
+        val botSettings = extractBotSettings(telegramUser)
+        if (botSettings.language == RU_LOCALE) {
+            return SendMessage().apply {
+                text = messageService.getMessage(
+                    "settings.voice",
+                    from.languageCode
+                )
+                replyMarkup = ReplyKeyboardMarkup().apply {
+                    keyboard = voicesKeyBoardSetup(RU_LOCALE)
+                }
+                chatId = telegramUser.chatTelegramId.toString()
+            }
+        } else {
+            return SendMessage().apply {
+                text = messageService.getMessage(
+                    "settings.voice",
+                    from.languageCode
+                )
+                replyMarkup = ReplyKeyboardMarkup().apply {
+                    keyboard = voicesKeyBoardSetup(EN_LOCALE)
+                }
+                chatId = telegramUser.chatTelegramId.toString()
+            }
+        }
+    }
+
     /**
      * Method handle setup branch for bot.
      */
     fun handleSettingBranch(messageOrCallback: String, user: TelegramUser, from: User): SendMessage {
         when (messageOrCallback) {
-            "ru-RU" -> return updateSettingsLocal(messageOrCallback, user, from)
-            "en-US" -> return updateSettingsLocal(messageOrCallback, user, from)
+            RU_LOCALE -> return updateSettingsLocal(messageOrCallback, user, from)
+            EN_LOCALE -> return updateSettingsLocal(messageOrCallback, user, from)
         }
         return updateSettingsVoice(messageOrCallback, user, from)
     }
@@ -76,6 +158,20 @@ class BotSettingService(
         )
     }
 
+    fun settingsKeyBoardsSetup(): List<List<InlineKeyboardButton>> {
+        return listOf(
+            listOf(
+                InlineKeyboardButton().apply {
+                    text = VOICE
+                    callbackData = VOICE_SETTINGS
+                },
+                InlineKeyboardButton().apply {
+                    text = LANGUAGE
+                    callbackData = LANGUAGE_SETTINGS
+                })
+        )
+    }
+
     /**
      * Method update setting for Yandex API. (Language)
      */
@@ -87,7 +183,7 @@ class BotSettingService(
             apply {
                 botSettings = objectMapper.writeValueAsString(botSettingModel)
                 lastUpdate = LocalDateTime.now()
-                isReady = true
+                isReady = false
             }
         }
         telegramUserService.save(user)
@@ -105,7 +201,7 @@ class BotSettingService(
      * Method update setting for Yandex API. (Voice)
      */
     private fun updateSettingsVoice(message: String, user: TelegramUser, from: User): SendMessage {
-        val voidFromMessage: String = if (message.contains(EN_EMOJI)) {
+        val voiceFromMessage: String = if (message.contains(EN_EMOJI)) {
             message.replace(EN_EMOJI, "")
         } else {
             message.replace(RU_EMOJI, "")
@@ -113,12 +209,16 @@ class BotSettingService(
 
 
         val botSettingModel = extractBotSettings(user)
-        botSettingModel.voice = voidFromMessage.replace(SPACE, EMPTY)
+        val voiceToSave = YANDEX_VOICES_MAP[voiceFromMessage.replace(SPACE, EMPTY)]
+            ?: validateVoice(botSettingModel.language)
+
+        botSettingModel.voice = voiceToSave
 
         user.apply {
             apply {
                 botSettings = objectMapper.writeValueAsString(botSettingModel)
                 lastUpdate = LocalDateTime.now()
+                isReady = true
             }
         }
         telegramUserService.save(user)
@@ -166,5 +266,13 @@ class BotSettingService(
             BotSettingModel()
         }
         return botSetting
+    }
+
+    fun validateVoice(voice: String): String {
+        return if (voice == "ru-Ru") {
+            ALENA_VOICE
+        } else {
+            JOHN_VOICE
+        }
     }
 }

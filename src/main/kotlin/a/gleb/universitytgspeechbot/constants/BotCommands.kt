@@ -4,7 +4,11 @@ const val COMMAND_INIT_CHAR: String = "/"
 
 const val START: String = COMMAND_INIT_CHAR + "start"
 
-const val STOP: String = COMMAND_INIT_CHAR + "stop"
+const val SETTINGS: String = COMMAND_INIT_CHAR + "settings"
+
+const val VOICE_SETTINGS: String = COMMAND_INIT_CHAR + "voice"
+
+const val LANGUAGE_SETTINGS: String = COMMAND_INIT_CHAR + "language"
 
 const val RU_LOCALE = "ru-RU"
 
@@ -24,4 +28,10 @@ val LIST_USER_RESPONSE_VOICES = listOf(
     "Мадирус $RU_EMOJI",
     "Омаж $RU_EMOJI",
     "Захар $RU_EMOJI"
+)
+
+val LIST_SETTINGS = listOf(
+    SETTINGS,
+    VOICE_SETTINGS,
+    LANGUAGE_SETTINGS
 )
