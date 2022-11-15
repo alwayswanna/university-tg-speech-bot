@@ -21,6 +21,7 @@ class TelegramUserService(
                 userTelegramId = from.id
                 chatTelegramId = chatId
                 lastUpdate = LocalDateTime.now()
+                isReady = false
             }
             telegramUserRepository.save(tgUser)
         }

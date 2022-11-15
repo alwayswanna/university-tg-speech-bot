@@ -1,7 +1,6 @@
 package a.gleb.universitytgspeechbot.service
 
 import a.gleb.universitytgspeechbot.configuration.properties.TelegramSpeechBotProperties
-import a.gleb.universitytgspeechbot.constants.YANDEX_VOICES_MAP
 import a.gleb.universitytgspeechbot.db.dao.TelegramUser
 import a.gleb.universitytgspeechbot.feign.YandexSpeechApiFeignClient
 import a.gleb.universitytgspeechbot.models.BotSettingModel
@@ -34,8 +33,7 @@ class YandexSpeechService(
             YandexSpeechRequest(
                 messageToConvert,
                 botSetting.language,
-                // TODO: save to db request param, not cast.
-                YANDEX_VOICES_MAP[botSetting.voice]!!,
+                botSetting.voice,
                 properties.yandexApi.folderId
             )
         val speech = yandexSpeechApiFeignClient.getVoice(BEARER + iamToken.token, speechRequest)

@@ -12,3 +12,6 @@
 1. Run all from `docker-compose.yaml`
 2. Insert your tokens to config `application.yaml`
 
+### Preview:
+![img.png](img.png)
+

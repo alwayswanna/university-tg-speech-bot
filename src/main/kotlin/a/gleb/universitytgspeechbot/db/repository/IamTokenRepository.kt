@@ -9,6 +9,5 @@ import java.util.*
 @Repository
 interface IamTokenRepository : JpaRepository<IamToken, UUID> {
 
-    //TODO: check request yesterday
     fun findByExpiredDateAfterOrderByCreateAtAsc(currentTime: LocalDateTime): IamToken?
 }
